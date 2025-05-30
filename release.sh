@@ -11,11 +11,10 @@ APP_NAME="${1:-MyApp}"
 PRIMARY_DIR="${APP_NAME}"
 SECOND_DIR="${APP_NAME}_Second"
 THIRD_DIR="${APP_NAME}_Third"
-PATCH_DIR="../${APP_NAME}_update_patches"
 VERSION_FILE="Config.xcconfig"
 MARKETING_KEY="LOOP_FOLLOW_MARKETING_VERSION"
 DEV_BRANCH="dev"
-MAIN_BRANCH="Main"
+MAIN_BRANCH="Main" 
 # ---------------------------------------
 
 pause() { read -rp "▶▶  Press Enter to continue (Ctrl-C to abort)…"; }
@@ -94,31 +93,44 @@ pause                                     # checkpoint ③ – manual build test
 
 queue_push git push origin "$MAIN_BRANCH" # ⬅ queued
 
-# make diff-patch for downstream repos
-mkdir -p "$PATCH_DIR"
-git diff "v${old_ver}".."v${new_ver}" > "${PATCH_DIR}/LF_v${new_ver}.patch"
 cd ..
 
 # ---------- function to update a follower repo ----------
+# ---------- function to update a follower repo ----------
 update_follower () {
   local DIR="$1"
+
   echo
   echo "🔄  Updating $DIR …"
   cd "$DIR"
+
+  # 1 · Make sure we start from a clean, up-to-date main
   echo_run git checkout main
   echo_run git fetch --all
   echo_run git pull
-  echo_run git apply "${PATCH_DIR}/LF_v${new_ver}.patch" || {
-    echo "‼️  Patch failed – resolve manually"; exit 1; }
+
+  # 2 · Add a TEMP remote that points to the primary repo on disk
+  echo_run git remote remove lf 2>/dev/null || true
+  echo_run git remote add    lf "../${PRIMARY_DIR}"
+
+  # 3 · Fetch just the release tag we need
+  echo_run git fetch lf "v${new_ver}"
+
+  # 4 · Merge the tag; pause if conflicts appear
+  if ! git merge --no-ff --no-commit "lf/v${new_ver}"; then
+    echo "‼️  Merge conflicts detected. Resolve them now, then press Enter."
+    pause
+  fi
+  git commit -m "merge v${new_ver} from LoopFollow"
+
+  # 5 · Drop the temp remote — it’s no longer needed
+  echo_run git remote remove lf
+
   echo_run git status
-  pause                                 # checkpoint ④ – review status
+  pause                                     # checkpoint – build & test
 
-  git add .
-  git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
-  echo "💻  Build & test ${DIR} now."
-  pause                                 # checkpoint ⑤ – manual build test
-
-  queue_push git push origin main       # ⬅ queued
+  # 6 · Queue the push for later
+  queue_push git push origin main           # queued, not executed now
   cd ..
 }
 
