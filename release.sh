@@ -89,7 +89,7 @@ git format-patch -k --stdout "v${old_ver}".."v${new_ver}" > "$MBX_FILE"
 
 cd ..
 
-# ---------- apply the mailbox in each follower repo -----------------
+# ---------- function to update a follower repo ----------
 update_follower () {
   local DIR="$1"
 
@@ -97,43 +97,45 @@ update_follower () {
   echo "🔄  Updating $DIR …"
   cd "$DIR"
 
+  # 1 · Start from a clean, up-to-date main
   echo_run git checkout main
   echo_run git fetch --all
   echo_run git pull
 
-  # Remember where we started so we can squash later
+  # 2 · Add (or refresh) a TEMP remote that points at the primary repo
+  if git remote | grep -q '^lf$'; then
+    echo_run git remote remove lf
+  fi
+  echo_run git remote add lf "$PRIMARY_ABS_PATH"
+
+  # 3 · Fetch the two release tags only
+  echo_run git fetch --no-tags lf \
+          "refs/tags/v${old_ver}:refs/tags/v${old_ver}" \
+          "refs/tags/v${new_ver}:refs/tags/v${new_ver}"
+
+  # 4 · Remember current HEAD so we can squash later
   start_sha=$(git rev-parse HEAD)
 
-  ############################################
-  # 1 · Try git am with 3-way merge support
-  ############################################
-  if git am --3way --keep-non-patch "$MBX_FILE"; then
-    echo "✅  git am --3way applied cleanly."
-  else
-    echo "⚠️  git am --3way failed (likely no common ancestor)."
-    echo "    Falling back to a straight apply…"
-    git am --abort
-
-    ############################################
-    # 2 · Plain git am (no 3-way)
-    ############################################
-    if ! git am --keep-non-patch "$MBX_FILE"; then
-      echo "‼️  Patch still failed to apply."
-      echo "    Resolve the rejects (*.rej), stage the files, then press Enter."
-      pause
-    fi
+  # 5 · Cherry-pick the full range *without* committing each step (-n)
+  #     If a conflict occurs, pause for manual resolution, then continue.
+  if ! git cherry-pick -x --no-commit "v${old_ver}..v${new_ver}"; then
+    echo "‼️  Conflicts detected during cherry-pick."
+    echo "    Resolve them (edit files, git add), then press Enter to continue."
+    pause
+    git cherry-pick --continue
   fi
 
-  ############################################
-  # 3 · Squash everything into ONE commit
-  ############################################
+  # 6 · Squash everything we just applied into ONE commit
   git reset --soft "$start_sha"
   git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
 
-  echo_run git status
-  pause                                      # build & test checkpoint
+  # 7 · Remove the temp remote
+  echo_run git remote remove lf
 
-  # 4 · Queue the push for later
+  echo_run git status
+  pause                                       # build & test checkpoint
+
+  # 8 · Queue the push for later
   queue_push git push origin main
   cd ..
 }
