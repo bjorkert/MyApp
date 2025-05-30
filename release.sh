@@ -30,7 +30,7 @@ queue_push() {
 if [ "$(basename "$PWD")" = "$APP_NAME" ]; then
   PRIMARY_DIR="."
 fi
-[ "$PRIMARY_DIR" != "." ] && cd "$PRIMARY_DIR"
+PRIMARY_ABS_PATH="$(pwd -P)"
 echo "🏁  Working in $PRIMARY_DIR …"
 
 echo_run git checkout "$DEV_BRANCH"
@@ -111,8 +111,8 @@ update_follower () {
 
   # 2 · Add a TEMP remote that points to the primary repo on disk
   echo_run git remote remove lf 2>/dev/null || true
-  echo_run git remote add    lf "../${PRIMARY_DIR}"
-
+  echo_run git remote add    lf "$PRIMARY_ABS_PATH"
+  
   # 3 · Fetch just the release tag we need
   echo_run git fetch lf "v${new_ver}"
 
