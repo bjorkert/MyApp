@@ -108,17 +108,19 @@ update_follower () {
   echo_run git fetch --all
   echo_run git pull
 
-  # 2 · Add a TEMP remote that points to the primary repo on disk
-#  echo_run git remote remove lf
-  pwd
+  # 2 · Add (or replace) the TEMP remote that points to the primary repo
+  if git remote | grep -q '^lf$'; then
+    echo_run git remote remove lf
+  fi
+  echo_run git remote add lf "$PRIMARY_ABS_PATH"
   echo "Remote add $PRIMARY_ABS_PATH"
   echo_run git remote add lf "$PRIMARY_ABS_PATH"
 
   # 3 · Fetch just the release tag we need
-  echo_run git fetch lf "v${new_ver}"
+  git fetch --no-tags lf "refs/tags/v${new_ver}:refs/tags/v${new_ver}"
 
   # 4 · Merge the tag; pause if conflicts appear
-  if ! git merge --no-ff --no-commit "lf/v${new_ver}"; then
+  if ! git merge --no-ff --no-commit "v${new_ver}"; then
     echo "‼️  Merge conflicts detected. Resolve them now, then press Enter."
     pause
   fi
