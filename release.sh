@@ -8,7 +8,6 @@ trap 'echo "❌  Error – aborting"; exit 1' ERR
 
 # -------- configurable -----------------
 APP_NAME="${1:-MyApp}"
-PRIMARY_DIR="${APP_NAME}"
 SECOND_DIR="${APP_NAME}_Second"
 THIRD_DIR="${APP_NAME}_Third"
 VERSION_FILE="Config.xcconfig"
@@ -31,7 +30,7 @@ if [ "$(basename "$PWD")" = "$APP_NAME" ]; then
   PRIMARY_DIR="."
 fi
 PRIMARY_ABS_PATH="$(pwd -P)"
-echo "🏁  Working in $PRIMARY_DIR …"
+echo "🏁  Working in $PRIMARY_ABS_PATH …"
 
 echo_run git checkout "$DEV_BRANCH"
 echo_run git fetch --all
@@ -110,9 +109,9 @@ update_follower () {
   echo_run git pull
 
   # 2 · Add a TEMP remote that points to the primary repo on disk
-  echo_run git remote remove lf 2>/dev/null || true
+  echo_run git remote remove lf 2>/dev/null
   echo_run git remote add    lf "$PRIMARY_ABS_PATH"
-  
+
   # 3 · Fetch just the release tag we need
   echo_run git fetch lf "v${new_ver}"
 
