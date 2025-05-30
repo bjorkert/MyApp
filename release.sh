@@ -109,8 +109,10 @@ update_follower () {
   echo_run git pull
 
   # 2 · Add a TEMP remote that points to the primary repo on disk
-  echo_run git remote remove lf 2>/dev/null
-  echo_run git remote add    lf "$PRIMARY_ABS_PATH"
+  echo_run git remote remove lf
+  pwd
+  echo "Remote add $PRIMARY_ABS_PATH"
+  echo_run git remote add lf "$PRIMARY_ABS_PATH"
 
   # 3 · Fetch just the release tag we need
   echo_run git fetch lf "v${new_ver}"
