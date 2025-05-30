@@ -96,6 +96,7 @@ cd ..
 
 # ---------- function to update a follower repo ----------
 # ---------- function to update a follower repo ----------
+# ---------- function to update a follower repo ----------
 update_follower () {
   local DIR="$1"
 
@@ -108,30 +109,33 @@ update_follower () {
   echo_run git fetch --all
   echo_run git pull
 
-  # 2 · Add (or replace) the TEMP remote that points to the primary repo
+  # 2 · Add (or replace) a TEMP remote that points to the primary repo
   if git remote | grep -q '^lf$'; then
     echo_run git remote remove lf
   fi
-  echo "Remote add $PRIMARY_ABS_PATH"
   echo_run git remote add lf "$PRIMARY_ABS_PATH"
 
-  # 3 · Fetch just the release tag we need
-  git fetch --no-tags lf "refs/tags/v${new_ver}:refs/tags/v${new_ver}"
+  # 3 · Fetch just the tags we need from that repo
+  echo_run git fetch --tags lf
 
-  # 4 · Merge the tag; pause if conflicts appear
-  if ! git merge --no-ff --no-commit "v${new_ver}"; then
-    echo "‼️  Merge conflicts detected. Resolve them now, then press Enter."
+  # 4 · Cherry-pick the range v${old_ver}..v${new_ver} into the index
+  #     --no-commit keeps all patches staged as ONE combined change
+  if ! git cherry-pick -x --no-commit "v${old_ver}..v${new_ver}"; then
+    echo "‼️  Conflicts detected during cherry-pick."
+    echo "    Resolve them, then press Enter to continue."
     pause
   fi
-  git commit -m "merge v${new_ver} from LoopFollow"
 
-  # 5 · Drop the temp remote — it’s no longer needed
+  # 5 · Single commit that captures the whole release bump
+  git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
+
+  # 6 · Remove the temp remote
   echo_run git remote remove lf
 
   echo_run git status
-  pause                                     # checkpoint – build & test
+  pause                                     # build & test checkpoint
 
-  # 6 · Queue the push for later
+  # 7 · Queue the push for later
   queue_push git push origin main           # queued, not executed now
   cd ..
 }
