@@ -109,7 +109,7 @@ update_follower () {
   echo_run git pull
 
   # 2 · Add a TEMP remote that points to the primary repo on disk
-  echo_run git remote remove lf
+#  echo_run git remote remove lf
   pwd
   echo "Remote add $PRIMARY_ABS_PATH"
   echo_run git remote add lf "$PRIMARY_ABS_PATH"
