@@ -108,7 +108,7 @@ update_follower () {
   fi
   echo_run git remote add lf "$PRIMARY_ABS_PATH"
 
-  # 3 · Fetch the two release tags only
+  # 3 · Fetch only the two release tags
   echo_run git fetch --no-tags lf \
           "refs/tags/v${old_ver}:refs/tags/v${old_ver}" \
           "refs/tags/v${new_ver}:refs/tags/v${new_ver}"
@@ -116,16 +116,19 @@ update_follower () {
   # 4 · Remember current HEAD so we can squash later
   start_sha=$(git rev-parse HEAD)
 
-  # 5 · Cherry-pick the full range *without* committing each step (-n)
-  #     If a conflict occurs, pause for manual resolution, then continue.
-  if ! git cherry-pick -x --no-commit "v${old_ver}..v${new_ver}"; then
+  # 5 · Cherry-pick the whole range (normal mode, no -n)
+  if ! git cherry-pick -x "v${old_ver}..v${new_ver}"; then
     echo "‼️  Conflicts detected during cherry-pick."
     echo "    Resolve them (edit files, git add), then press Enter to continue."
     pause
-    git cherry-pick --continue
+    # User may already have continued; run a defensive check
+    while [ -f .git/CHERRY_PICK_HEAD ]; do
+      echo_run git cherry-pick --continue || {
+        echo "    Still conflicts. Fix and press Enter again."; pause; }
+    done
   fi
 
-  # 6 · Squash everything we just applied into ONE commit
+  # 6 · Squash every temporary commit into ONE follower-side commit
   git reset --soft "$start_sha"
   git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
 
