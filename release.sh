@@ -58,7 +58,7 @@ echo "🔢  Bumping version: $old_ver  →  $new_ver"
 old_tag="v${old_ver}"
 if ! git rev-parse "$old_tag" >/dev/null 2>&1; then
   git tag -a "$old_tag" -m "$old_tag"
-  queue_push git push --tags
+  queue_push push --tags
 fi
 
 # bump number in file
@@ -70,9 +70,9 @@ echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 echo "💻  Build & test dev branch now."
 pause
 
-queue_push git push origin "$DEV_BRANCH"
-queue_push git tag -a "v${new_ver}" -m "v${new_ver}"
-queue_push git push --tags
+queue_push push origin "$DEV_BRANCH"
+queue_push tag -a "v${new_ver}" -m "v${new_ver}"
+queue_push push --tags
 
 echo_run git checkout "$MAIN_BRANCH"
 echo_run git pull
@@ -80,7 +80,7 @@ echo_run git merge "$DEV_BRANCH"
 
 echo "💻  Build & test main branch now."
 pause
-queue_push git push origin "$MAIN_BRANCH"
+queue_push push origin "$MAIN_BRANCH"
 
 # --- create a mailbox with exactly the release commits ---------------
 mkdir -p "$PATCH_DIR"
@@ -139,7 +139,7 @@ update_follower () {
   pause                                       # build & test checkpoint
 
   # 8 · Queue the push for later
-  queue_push git push origin main
+  queue_push push origin main
   cd ..
 }
 
