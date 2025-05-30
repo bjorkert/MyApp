@@ -112,7 +112,6 @@ update_follower () {
   if git remote | grep -q '^lf$'; then
     echo_run git remote remove lf
   fi
-  echo_run git remote add lf "$PRIMARY_ABS_PATH"
   echo "Remote add $PRIMARY_ABS_PATH"
   echo_run git remote add lf "$PRIMARY_ABS_PATH"
 
