@@ -108,6 +108,10 @@ update_follower () {
   fi
   echo_run git remote add lf "$PRIMARY_ABS_PATH"
 
+  for tag in "v${old_ver}" "v${new_ver}"; do
+    git rev-parse -q "$tag" >/dev/null && echo_run git tag -d "$tag"
+  done
+
   # 3 · Fetch only the two release tags
   echo_run git fetch --no-tags lf \
           "refs/tags/v${old_ver}:refs/tags/v${old_ver}" \
