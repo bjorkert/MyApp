@@ -101,20 +101,25 @@ update_follower () {
   echo_run git fetch --all
   echo_run git pull
 
-  # apply all release commits as ONE squashed change, with 3-way fallback
-  if ! git am --3way --squash "$MBX_FILE"; then
+  # Remember where we started so we can squash later
+  start_sha=$(git rev-parse HEAD)
+
+  # Apply all release commits with 3-way merge support
+  if ! git am --3way "$MBX_FILE"; then
     echo "‼️  Conflicts detected during git am."
     echo "    Resolve them, stage the files, then press Enter to continue."
     pause
     git am --continue
   fi
 
+  # Squash everything we just applied into ONE commit
+  git reset --soft "$start_sha"
   git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
 
   echo_run git status
-  pause                                       # build & test checkpoint
+  pause                                    # build & test checkpoint
 
-  queue_push git push origin main
+  queue_push git push origin main          # queued for later
   cd ..
 }
 
