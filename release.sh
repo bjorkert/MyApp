@@ -104,22 +104,37 @@ update_follower () {
   # Remember where we started so we can squash later
   start_sha=$(git rev-parse HEAD)
 
-  # Apply all release commits with 3-way merge support
-  if ! git am --3way "$MBX_FILE"; then
-    echo "‼️  Conflicts detected during git am."
-    echo "    Resolve them, stage the files, then press Enter to continue."
-    pause
-    git am --continue
+  ############################################
+  # 1 · Try git am with 3-way merge support
+  ############################################
+  if git am --3way --keep-non-patch "$MBX_FILE"; then
+    echo "✅  git am --3way applied cleanly."
+  else
+    echo "⚠️  git am --3way failed (likely no common ancestor)."
+    echo "    Falling back to a straight apply…"
+    git am --abort
+
+    ############################################
+    # 2 · Plain git am (no 3-way)
+    ############################################
+    if ! git am --keep-non-patch "$MBX_FILE"; then
+      echo "‼️  Patch still failed to apply."
+      echo "    Resolve the rejects (*.rej), stage the files, then press Enter."
+      pause
+    fi
   fi
 
-  # Squash everything we just applied into ONE commit
+  ############################################
+  # 3 · Squash everything into ONE commit
+  ############################################
   git reset --soft "$start_sha"
   git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
 
   echo_run git status
-  pause                                    # build & test checkpoint
+  pause                                      # build & test checkpoint
 
-  queue_push git push origin main          # queued for later
+  # 4 · Queue the push for later
+  queue_push git push origin main
   cd ..
 }
 
