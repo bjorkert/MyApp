@@ -71,7 +71,7 @@ echo "💻  Build & test dev branch now."
 pause
 
 queue_push push origin "$DEV_BRANCH"
-git tag -a "v${new_ver}" -m "v${new_ver}"
+git tag -a "+v${new_ver}" -m "v${new_ver}"
 queue_push push --tags
 
 echo_run git checkout "$MAIN_BRANCH"
