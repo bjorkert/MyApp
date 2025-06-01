@@ -74,7 +74,7 @@ echo "🔢  Bumping version: $old_ver  →  $new_ver"
 old_tag="v${old_ver}"
 # Script should never be run without old tag already set
 if ! git rev-parse "$old_tag" >/dev/null 2>&1; then
-  echo "❌  The expected tag, {$old_tag}, does not exist"; exit 1 ;;
+  echo "❌  The expected tag, {$old_tag}, does not exist"; exit 1 ;
 fi
 
 # --- switch to dev branch to release accumulated PR ----
