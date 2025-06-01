@@ -25,14 +25,12 @@ queue_push() { push_cmds+=("git -C \"$(pwd)\" $*"); echo "+ [queued] (in $(pwd))
 
 queue_delete_remote_tag () {
   local tag="$1"
-  echo "queue_delete_remote_tag: {$1}, {$tag}"
   # shellcheck disable=SC2086
   queue_push push --delete origin $tag
 }
 
 queue_push_tag () {
   local tag="$1"
-  echo "queue_delete_remote_tag: {$1}, {$tag}"
   queue_push push origin "refs/tags/$tag"
 }
 
@@ -55,6 +53,7 @@ echo_run git pull
 
 # -------- version bump logic (unchanged) -----------
 old_ver=$(grep -E "^${MARKETING_KEY}[[:space:]]*=" "$VERSION_FILE" | awk '{print $3}')
+echo "old_ver is {$old_ver}"
 major_candidate="$(awk -F. '{printf "%d.0.0", $1 + 1}' <<<"$old_ver")"
 minor_candidate="$(awk -F. '{printf "%d.%d.0", $1, $2 + 1}' <<<"$old_ver")"
 
@@ -72,25 +71,27 @@ esac
 
 echo "🔢  Bumping version: $old_ver  →  $new_ver"
 
-# --- switch to dev branch to release accumulated PR 
-#     dev branch is old_ver.n where n is the number 
-#     of PR merged since last release ---- 
-
-echo_run git checkout "$DEV_BRANCH"
-echo_run git fetch
-echo_run git pull
-
 old_tag="v${old_ver}"
 if ! git rev-parse "$old_tag" >/dev/null 2>&1; then
   git tag -a "$old_tag" -m "$old_tag"
   queue_push push --tags
 fi
 
+# --- switch to dev branch to release accumulated PR ----
+#     dev branch is old_ver.n where n is the number 
+#     of PR merged since last release
+
+echo_run git checkout "$DEV_BRANCH"
+echo_run git fetch
+echo_run git pull
+
 sed -i '' "s/${MARKETING_KEY}[[:space:]]*=.*/${MARKETING_KEY} = ${new_ver}/" "$VERSION_FILE"
 echo_run git diff "$VERSION_FILE"; pause
 echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 
-echo "💻  Build & test dev branch now."; pause
+echo "💻  Build & test dev branch now."; 
+xed . &
+pause
 queue_push push origin "$DEV_BRANCH"
 git tag -d "v${new_ver}" 2>/dev/null || true
 git tag -a "v${new_ver}" -m "v${new_ver}"
@@ -100,7 +101,9 @@ queue_push_tag "v${new_ver}"
 echo_run git checkout "$MAIN_BRANCH"
 echo_run git pull
 echo_run git merge "$DEV_BRANCH"
-echo "💻  Build & test main branch now."; pause
+echo "💻  Build & test main branch now."; 
+xed . &
+pause
 queue_push push origin "$MAIN_BRANCH"
 
 # --- create a patch  ---------------------------
@@ -123,7 +126,7 @@ update_follower () {
   echo_run git pull
 
   # 2 · Apply the patch with 3-way fallback
-  if ! git apply --3way "$PATCH_FILE"; then
+  if ! git apply --3way  --whitespace=nowarn "$PATCH_FILE"; then
     echo "‼️  Some hunks could not be merged automatically."
   fi
 
