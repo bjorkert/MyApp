@@ -47,13 +47,12 @@ PRIMARY_ABS_PATH="$(pwd -P)"
 echo "🏁  Working in $PRIMARY_ABS_PATH …"
 
 # --- start out in main to capture old_ver ---- 
-echo_run git checkout "$MAIN_BRANCH"
+echo_run git switch "$MAIN_BRANCH"
 echo_run git fetch
 echo_run git pull
 
 # -------- version bump logic (unchanged) -----------
 old_ver=$(grep -E "^${MARKETING_KEY}[[:space:]]*=" "$VERSION_FILE" | awk '{print $3}')
-echo "old_ver is {$old_ver}"
 major_candidate="$(awk -F. '{printf "%d.0.0", $1 + 1}' <<<"$old_ver")"
 minor_candidate="$(awk -F. '{printf "%d.%d.0", $1, $2 + 1}' <<<"$old_ver")"
 
@@ -81,7 +80,7 @@ fi
 #     dev branch is old_ver.n where n is the number 
 #     of PR merged since last release
 
-echo_run git checkout "$DEV_BRANCH"
+echo_run git switch "$DEV_BRANCH"
 echo_run git fetch
 echo_run git pull
 
@@ -89,21 +88,17 @@ sed -i '' "s/${MARKETING_KEY}[[:space:]]*=.*/${MARKETING_KEY} = ${new_ver}/" "$V
 echo_run git diff "$VERSION_FILE"; pause
 echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 
-echo "💻  Build & test dev branch now."; 
-xed . &
-pause
+echo "💻  Build & test dev branch now."; pause
 queue_push push origin "$DEV_BRANCH"
 git tag -d "v${new_ver}" 2>/dev/null || true
 git tag -a "v${new_ver}" -m "v${new_ver}"
 queue_delete_remote_tag "v${new_ver}"
 queue_push_tag "v${new_ver}"
 
-echo_run git checkout "$MAIN_BRANCH"
+echo_run git switch "$MAIN_BRANCH"
 echo_run git pull
 echo_run git merge "$DEV_BRANCH"
-echo "💻  Build & test main branch now."; 
-xed . &
-pause
+echo "💻  Build & test main branch now."; pause
 queue_push push origin "$MAIN_BRANCH"
 
 # --- create a patch  ---------------------------
@@ -121,7 +116,7 @@ update_follower () {
   cd "$DIR"
 
   # 1 · Make sure we’re on a clean, up-to-date main
-  echo_run git checkout "$MAIN_BRANCH"
+  echo_run git switch "$MAIN_BRANCH"
   echo_run git fetch
   echo_run git pull
 
