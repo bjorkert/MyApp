@@ -25,12 +25,14 @@ queue_push() { push_cmds+=("git -C \"$(pwd)\" $*"); echo "+ [queued] (in $(pwd))
 
 queue_delete_remote_tag () {
   local tag="$1"
+  echo "queue_delete_remote_tag: {$1}, {$tag}"
   # shellcheck disable=SC2086
   queue_push push --delete origin $tag
 }
 
 queue_push_tag () {
   local tag="$1"
+  echo "queue_delete_remote_tag: {$1}, {$tag}"
   queue_push push origin "refs/tags/$tag"
 }
 
@@ -46,8 +48,9 @@ delete_local_tag_if_exists () {
 PRIMARY_ABS_PATH="$(pwd -P)"
 echo "🏁  Working in $PRIMARY_ABS_PATH …"
 
-echo_run git checkout "$DEV_BRANCH"
-echo_run git fetch --all
+# --- start out in main to capture old_ver ---- 
+echo_run git checkout "$MAIN_BRANCH"
+echo_run git fetch
 echo_run git pull
 
 # -------- version bump logic (unchanged) -----------
@@ -68,6 +71,14 @@ case "$choice" in
 esac
 
 echo "🔢  Bumping version: $old_ver  →  $new_ver"
+
+# --- switch to dev branch to release accumulated PR 
+#     dev branch is old_ver.n where n is the number 
+#     of PR merged since last release ---- 
+
+echo_run git checkout "$DEV_BRANCH"
+echo_run git fetch
+echo_run git pull
 
 old_tag="v${old_ver}"
 if ! git rev-parse "$old_tag" >/dev/null 2>&1; then
@@ -107,8 +118,8 @@ update_follower () {
   cd "$DIR"
 
   # 1 · Make sure we’re on a clean, up-to-date main
-  echo_run git checkout main
-  echo_run git fetch --all
+  echo_run git checkout "$MAIN_BRANCH"
+  echo_run git fetch
   echo_run git pull
 
   # 2 · Apply the patch with 3-way fallback
@@ -129,7 +140,7 @@ update_follower () {
 
   echo_run git status
   pause                                     # build & test checkpoint
-  queue_push push origin main
+  queue_push push origin "$MAIN_BRANCH"
   cd ..
 }
 
