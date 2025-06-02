@@ -148,5 +148,5 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
   echo "👉  Remember to create a GitHub release for tag v${new_ver}."
 else
   echo "🚫  Pushes skipped.  Run manually if needed:"; printf '   %s\n' "${push_cmds[@]}"
-  echo "🚫  Release not completed, pushes to GitHub were skipped
+  echo "🚫  Release not completed, pushes to GitHub were skipped"
 fi
