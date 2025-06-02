@@ -99,7 +99,7 @@ echo_run git pull
 # --- update version number ----
 sed -i '' "s/${MARKETING_KEY}[[:space:]]*=.*/${MARKETING_KEY} = ${new_ver}/" "$VERSION_FILE"
 echo_run git diff "$VERSION_FILE"; pause
-echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
+echo_run git commit -m "update version to ${new_ver} [skip ci]" "$VERSION_FILE"
 
 echo "💻  Build & test dev branch now."; pause
 queue_push push origin "$DEV_BRANCH"
