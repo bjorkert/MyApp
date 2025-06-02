@@ -17,6 +17,7 @@ MAIN_BRANCH="main"
 PATCH_DIR="../${APP_NAME}_update_patches"
 # ---------------------------------------
 
+# --- functions here ---
 pause()     { read -rp "▶▶  Press Enter to continue (Ctrl-C to abort)…"; }
 echo_run()  { echo "+ $*"; "$@"; }
 
@@ -26,6 +27,40 @@ queue_push() { push_cmds+=("git -C \"$(pwd)\" $*"); echo "+ [queued] (in $(pwd))
 queue_push_tag () {
   local tag="$1"
   queue_push push origin "refs/tags/$tag"
+}
+
+update_follower () {
+  local DIR="$1"
+  echo; echo "🔄  Updating $DIR …"
+  cd "$DIR"
+
+  # 1 · Make sure we’re on a clean, up-to-date main
+  echo_run git switch "$MAIN_BRANCH"
+  echo_run git fetch
+  echo_run git pull
+
+  # 2 · Apply the patch with 3-way fallback
+  if ! git apply --3way  --whitespace=nowarn "$PATCH_FILE"; then
+    echo "‼️  Some hunks could not be merged automatically."
+  fi
+
+  # 3 · Pause if any conflict markers remain
+  if git ls-files -u | grep -q .; then
+    echo "⚠️  Conflicts detected."
+    echo "    If Fastfile or build_LoopFollow.yml were modified, these are expected."
+    echo "    Open your merge tool, resolve, then press Enter."
+    pause
+  fi
+
+  # 4 · Single commit capturing all staged changes
+  git add -u
+  git add $(git ls-files --others --exclude-standard) 2>/dev/null || true
+  git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
+
+  echo_run git status
+  pause                                     # build & test checkpoint
+  queue_push push origin "$MAIN_BRANCH"
+  cd ..
 }
 
 # ---------- PRIMARY REPO ----------
@@ -83,39 +118,6 @@ echo "💻  Build & test main branch now."; pause
 queue_push push origin "$MAIN_BRANCH"
 
 cd ..
-
-update_follower () {
-  local DIR="$1"
-  echo; echo "🔄  Updating $DIR …"
-  cd "$DIR"
-
-  # 1 · Make sure we’re on a clean, up-to-date main
-  echo_run git switch "$MAIN_BRANCH"
-  echo_run git fetch
-  echo_run git pull
-
-  # 2 · Apply the patch with 3-way fallback
-  if ! git apply --3way  --whitespace=nowarn "$PATCH_FILE"; then
-    echo "‼️  Some hunks could not be merged automatically."
-  fi
-
-  # 3 · Pause if any conflict markers remain
-  if git ls-files -u | grep -q .; then
-    echo "⚠️  Conflicts detected.  Open your merge tool, resolve, then press Enter."
-    pause
-  fi
-
-  # 4 · Single commit capturing all staged changes
-  git add -u
-  git add $(git ls-files --others --exclude-standard) 2>/dev/null || true
-  git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
-
-  echo_run git status
-  pause                                     # build & test checkpoint
-  queue_push push origin "$MAIN_BRANCH"
-  cd ..
-}
-
 update_follower "$SECOND_DIR"
 update_follower "$THIRD_DIR"
 
@@ -125,6 +127,9 @@ echo "💻  Test GitHub Build Actions and then continue."; pause
 # ---------- push queue ----------
 echo; echo "🚀  Ready to tag and push changes upstream."
 echo_run git log --oneline -10
+
+# --- return to primary path
+cd ${PRIMARY_ABS_PATH}
 
 read -rp "▶▶  Ready to tag? (y/N): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
