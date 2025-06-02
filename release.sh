@@ -122,14 +122,14 @@ update_follower "$SECOND_DIR"
 update_follower "$THIRD_DIR"
 
 # ---------- GitHub Actions Test ---------
-echo "💻  Test GitHub Build Actions and then continue."; pause
+echo; echo "💻  Test GitHub Build Actions and then continue."; pause
+
+# --- return to primary path
+cd ${PRIMARY_ABS_PATH}
 
 # ---------- push queue ----------
 echo; echo "🚀  Ready to tag and push changes upstream."
 echo_run git log --oneline -10
-
-# --- return to primary path
-cd ${PRIMARY_ABS_PATH}
 
 read -rp "▶▶  Ready to tag? (y/N): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
