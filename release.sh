@@ -108,7 +108,7 @@ queue_push push origin "$DEV_BRANCH"
 mkdir -p "$PATCH_DIR"
 PATCH_FILE="${PATCH_DIR}/LF_diff_${old_ver}_to_${new_ver}.patch"
 
-git diff -M --binary "v${old_ver}".."v${new_ver}" \
+git diff -M --binary "$MAIN_BRANCH" "$DEV_BRANCH"  \
   > "$PATCH_FILE"
 
 # --- merge dev into main for new release
