@@ -56,11 +56,12 @@ esac
 
 echo "🔢  Bumping version: $old_ver  →  $new_ver"
 
-# --- switch to dev branch to release accumulated PR ----
+# --- switch to dev branch ----
 echo_run git switch "$DEV_BRANCH"
 echo_run git fetch
 echo_run git pull
 
+# --- update version number ----
 sed -i '' "s/${MARKETING_KEY}[[:space:]]*=.*/${MARKETING_KEY} = ${new_ver}/" "$VERSION_FILE"
 echo_run git diff "$VERSION_FILE"; pause
 echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
@@ -68,17 +69,18 @@ echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 echo "💻  Build & test dev branch now."; pause
 queue_push push origin "$DEV_BRANCH"
 
-echo_run git switch "$MAIN_BRANCH"
-echo_run git merge "$DEV_BRANCH"
-echo "💻  Build & test main branch now."; pause
-queue_push push origin "$MAIN_BRANCH"
-
 # --- create a patch  ---------------------------
 mkdir -p "$PATCH_DIR"
 PATCH_FILE="${PATCH_DIR}/LF_diff_${old_ver}_to_${new_ver}.patch"
 
 git diff -M --binary "v${old_ver}".."v${new_ver}" \
   > "$PATCH_FILE"
+
+# --- merge dev into main for new release
+echo_run git switch "$MAIN_BRANCH"
+echo_run git merge "$DEV_BRANCH"
+echo "💻  Build & test main branch now."; pause
+queue_push push origin "$MAIN_BRANCH"
 
 cd ..
 
