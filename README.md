@@ -1,8 +1,9 @@
 > **Message from the Loop and Learn Team:**
-> * We have taken responsibility for updates to the Loop Follow app
-> * Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/)
+> * We have taken responsibility for updates to the LoopFollow app - many thanks to Jon Fawcett, the originator of this app
+> * Additional LoopFollow documentation is at [Loop and Learn: LoopFollow](https://www.loopandlearn.org/loop-follow/)
 > * If you are having problems with the app:
->     * Post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN); indicate that your question is related to Loop Follow
+>     * Please join the [LoopFollow Facebook group](https://www.facebook.com/groups/loopfollowlnl);
+>     * You can also post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN); but be sure to indicate that your question is related to LoopFollow
 >     * If you do not use Facebook - please click on this [link to file an Issue](https://github.com/loopandlearn/LoopFollow/issues) with your problem
 
 > **New location for LoopFollow Repository:**
@@ -11,17 +12,11 @@
 >    * GitHub should automatically redirect you to this new address
 >    * We have also modifed one branch and one file name to match standard conventions: _main_ (from _Main_) and _README.md_ (from _readme.md_)
 
-> **Message from Jon Fawcett:**
-> * Because our family now uses Omnipod 5, I will no longer be involved in updating LoopFollow
-> * I have transferred the _LoopFollow_ repository from the _JonFawcett_ to the _loopandlearn_ username
-> * I will also no longer provide an option for a TestFlight invitation from me. (Jon Fawcett)
->   * You must build the app yourself.
-
 > **Message to Developers**
 
 * Please click on this link: [For Developers](#for-developers)
 
-## Loop Follow 
+## LoopFollow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
 
 ### Purpose:
@@ -39,9 +34,9 @@ low alert for the BG you want to wake up to and close Loop.
 
 ### Building Options
 
-Please see [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/) for all the building options.
+Please see [Loop and Learn: LoopFollow](https://www.loopandlearn.org/loop-follow/) for all the building options.
 
-With the release of version 2.1.0, there is now an easy option for building up to three instances of the Loop Follow app for multiple Loopers in your family. Each instance can be configured to have the display name you choose with these names being the default:
+With the release of version 2.1.0, there is now an easy option for building up to three instances of the LoopFollow app for multiple Loopers in your family. Each instance can be configured to have the display name you choose with these names being the default:
 
 * LoopFollow
 * LoopFollow_Second
@@ -56,7 +51,7 @@ The _display_name_ is found in a single file.
 Summary instructions by build method:
 
 * Browser Build: 
-    * Fork and setup the repository for each Loop Follow instance you want to use: 
+    * Fork and setup the repository for each LoopFollow instance you want to use: 
         * https://github.com/loopandlearn/LoopFollow
         * https://github.com/loopandlearn/LoopFollow_Second
         * https://github.com/loopandlearn/LoopFollow_Third
@@ -75,49 +70,25 @@ When modifications and versions are updated, there might be a slight delay for g
 
 ### General feature list
 
-Please review the list on [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/) which may be updated more frequently than this README.md file.
+Please review the list on [Loop and Learn: LoopFollow](https://www.loopandlearn.org/loop-follow/).
 
-Each time a release is made, the features added or bugs fixed are found at [Loop Follow Releases](https://github.com/loopandlearn/LoopFollow/releases).
-
-Each of the features below is selectable - you decide whether to use them.  Additionally, many features are adjustable because YDMV (your diabetes may vary).
-
-1. Scrollable/scalable graph display with BG, IOB, COB, Basal, Bolus, and the General Nightscout Care portal info
-    * Supports Glucose display when Dexcom is available but Nightscout is not
-    * Supports compatible data from Nightscout when the URL is provided (enable `Show Nightscout Settings` to see the URL, Token and Status rows)
-        * Loop: Loop status, Loop Prediction
-        * Trio and iAPS: status, Prediction lines, Autosens
-        * To remove the Data Table associated with NS, enter a blank line in URL
-2. Tap on Alarms on Toolbar to configure.
-    * Override DND (Do Not Disturb) and system volume for all alerts with a Snooze All Until and a Mute All Until
-    * List of Alarms covers the standard high/low/rise/fall/urgent glucose but also include alerts for missed glucose readings, if below configured glucose, IOB, COB, Not Looping, Overrides, Pump, Missed Bolus, SAGE, CAGE, Battery and Rec. Bolus
-    * Each Alarm has configurable settings including Sound selection, PreSnooze (set to be quiet At Night, During Day or Never) and Snooze Until and in some cases glucose ranges at which they are active
-3. Calendar entries (displayed on watch and/or carplay at 5 minute intervals) pre-formatted with two lines that the user can modify:
-    * BG, arrow, delta,  MINAGO (minutes ago for reading)
-    * COB, IOB, Basal (U/hr)
-4. Background silent audio is played to keep iOS from killing the app; this trick is why it can’t go into the App Store for a simple download and why Loop Follow puts an extra load on the phone battery
-5. Badge displays the current BG value on the app icon
-6. Information Display Settings allows user to configure the items selected and their order for the right panel when Nightscout URL is provided
-    * IOB, COB, Basal, Override, Battery, Pump, SAGE, CAGE, (Recommended) Rec. Bolus, (Glucose Eventually) Pred., Carbs today (Loop, Trio and iAPS)
-    * Autosens (Trio and iAPS only)
-7. Pull down on the glucose value to force a refresh from Nightscout (iPhone only - does not work on Mac)
-8. When adding a Nightscout site, NS Status says "Checking", "Site Not Found", "Token Required", "Invalid Token", or "OK"
-9. New with v2.1.2: Multiple Loopers (up to 3) are easily supported with either Browser Build or Mac-Xcode build
-10. New with v2.1.2: The app name (displayed on phone) can be customized when building
-    * If enabled, that custom name will be displayed on the main Loop Follow display
+Each time a release is made, the features added or bugs fixed are found at [LoopFollow Releases](https://github.com/loopandlearn/LoopFollow/releases).
 
 ### Open Source DIY
 - This is a DIY open source project that may or may not function as you expect. You take full responsibility for building and running this app and do so at your own risk.
 
 ## Versions
 
-We added version numbers to Loop Follow. Typically the main branch and dev branch are at the same version, but when work is underway, the dev branch may have different code, which we try to indicate with a different version number.
+We added version numbers to LoopFollow. The numbers below are just examples.
 
-The versioning is:
-
-* major.minor.micro
-* For example our first version is 2.0.0
-
-For the most part, the deveopers keep main and dev branches at the same level. But sometimes we want to combine several PR or keep a modification in dev for additional testing.
+* The `main` branch is the released version and will have a number ending in 0, e.g., 2.7.0.
+* The `dev` branch is where updates are added by pull requests
+    * When `dev` is modified with respect to `main`, the version number in `dev` is incremented, e.g., 2.7.1 or 2.7.2
+* The branch name and version number is reported at the bottom of the LoopFollow settings screen
+    * `main` 2.7.0 is the released code
+    * `dev` 2.7.0 is identical to main
+    * `dev` 2.7.2 means 2 PR have been merged into dev since the last release
+* We sometimes make mistakes, so please be alert when the version numbers increment
 
 ## For Developers
 
@@ -128,6 +99,15 @@ New PR are directed to the dev branch. If you direct one to main, we will move i
 
 After a PR is merged to dev, the repository maintainers will bump up the verion number before merging to main - please do not modify the version in your branch.
 
-#### Version Updates
+### Version Updates
 
-Only the maintainers for Loop Follow will update version numbers. This is done by incrementing the LOOP_FOLLOW_MARKETING_VERSION in Config.xcconfig file.
+Only the maintainers for LoopFollow will update version numbers.
+
+### Release Process
+
+To assist in releasing to all three LoopFollow repositories, the script `release.sh` is now available. This bumps up the version number to M.N+1.0 for a minor release or M+1.0.0 for a major release. It also updates the LoopFollow_Second and LoopFollow_Third repositories with parallel changes to what was just released for LoopFollow. Only LoopFollow uses a `dev` branch. The other repositories use just the `main` branch and are kept at the released version.
+
+When a release is generated, the updates found in the `dev` branch are merged into `main`; the version number in the `Config.xcconfig` file is updated to A.B.O; a tag of the form v.A.B.0 is created and associated with the `main` branch at that time.
+
+When PR are subsequently merged to `dev`, the version number is incremented by 1 in the last place, e.g., "v.A.B.1" etc.
+
