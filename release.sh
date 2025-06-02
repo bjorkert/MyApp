@@ -129,13 +129,13 @@ cd ${PRIMARY_ABS_PATH}
 
 # ---------- push queue ----------
 echo; echo "🚀  Ready to tag and push changes upstream."
-echo_run git log --oneline -10
+echo_run git log --oneline -2
 
 read -rp "▶▶  Ready to tag? (y/N): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
   git tag -a "v${new_ver}" -m "v${new_ver}"
   queue_push_tag "v${new_ver}"
-  echo_run git log --oneline -10
+  echo_run git log --oneline -2
 else
   echo "🚫  tag skipped, can add later"
 fi
