@@ -23,24 +23,9 @@ echo_run()  { echo "+ $*"; "$@"; }
 push_cmds=()
 queue_push() { push_cmds+=("git -C \"$(pwd)\" $*"); echo "+ [queued] (in $(pwd)) git $*"; }
 
-# If an inappropriate tag exists - this requires manual intervention
-queue_delete_remote_tag () {
-  local tag="$1"
-  # shellcheck disable=SC2086
-  queue_push push --delete origin $tag
-}
-
 queue_push_tag () {
   local tag="$1"
   queue_push push origin "refs/tags/$tag"
-}
-
-delete_local_tag_if_exists () {
-  local tag="$1"
-  if git rev-parse -q "$tag" >/dev/null 2>&1; then
-    echo "+ git tag -d $tag   # remove stale local tag"
-    git tag -d "$tag"
-  fi
 }
 
 # ---------- PRIMARY REPO ----------
@@ -71,16 +56,7 @@ esac
 
 echo "🔢  Bumping version: $old_ver  →  $new_ver"
 
-old_tag="v${old_ver}"
-# Script should never be run without old tag already set
-if ! git rev-parse "$old_tag" >/dev/null 2>&1; then
-  echo "❌  The expected tag, {$old_tag}, does not exist"; exit 1 ;
-fi
-
 # --- switch to dev branch to release accumulated PR ----
-#     dev branch is old_ver.n where n is the number 
-#     of PR merged since last release
-
 echo_run git switch "$DEV_BRANCH"
 echo_run git fetch
 echo_run git pull
@@ -91,8 +67,6 @@ echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 
 echo "💻  Build & test dev branch now."; pause
 queue_push push origin "$DEV_BRANCH"
-git tag -a "v${new_ver}" -m "v${new_ver}"
-queue_push_tag "v${new_ver}"
 
 echo_run git switch "$MAIN_BRANCH"
 echo_run git merge "$DEV_BRANCH"
@@ -143,8 +117,22 @@ update_follower () {
 update_follower "$SECOND_DIR"
 update_follower "$THIRD_DIR"
 
+# ---------- GitHub Actions Test ---------
+echo "💻  Test GitHub Build Actions and then continue."; pause
+
 # ---------- push queue ----------
-echo; echo "🚀  Ready to push queued changes upstream."
+echo; echo "🚀  Ready to tag and push changes upstream."
+echo_run git log --oneline -10
+
+read -rp "▶▶  Ready to tag? (y/N): " confirm
+if [[ $confirm =~ ^[Yy]$ ]]; then
+  git tag -a "v${new_ver}" -m "v${new_ver}"
+  queue_push_tag "v${new_ver}"
+  echo_run git log --oneline -10
+else
+  echo "🚫  tag skipped, can add later"
+fi
+
 read -rp "▶▶  Push everything now? (y/N): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
   for cmd in "${push_cmds[@]}"; do echo "+ $cmd"; bash -c "$cmd"; done
