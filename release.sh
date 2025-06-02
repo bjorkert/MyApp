@@ -144,9 +144,9 @@ read -rp "▶▶  Push everything now? (y/N): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
   for cmd in "${push_cmds[@]}"; do echo "+ $cmd"; bash -c "$cmd"; done
   echo "🎉  All pushes completed."
+  echo; echo "🎉  All repos updated to v${new_ver} (local)."
+  echo "👉  Remember to create a GitHub release for tag v${new_ver}."
 else
   echo "🚫  Pushes skipped.  Run manually if needed:"; printf '   %s\n' "${push_cmds[@]}"
+  echo "🚫  Release not completed, pushes to GitHub were skipped
 fi
-
-echo; echo "🎉  All repos updated to v${new_ver} (local)."
-echo "👉  Remember to create a GitHub release for tag v${new_ver}."
