@@ -11,6 +11,7 @@ on:
     - cron: "0 10 1 * *" # Builds the app on the 1st of every month at 10:00 UTC
 
 env:  
+  # add comment near LoopFollow to cause a conflict when merging
   UPSTREAM_REPO: loopandlearn/LoopFollow
   UPSTREAM_BRANCH: ${{ github.ref_name }} # branch on upstream repository to sync from (replace with specific branch name if needed)
   TARGET_BRANCH: ${{ github.ref_name }} # target branch on fork to be kept in sync, and target branch on upstream to be kept alive (replace with specific branch name if needed)
