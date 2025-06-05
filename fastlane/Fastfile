@@ -59,11 +59,6 @@ platform :ios do
       ]
     )
 
-    previous_build_number = latest_testflight_build_number(
-      app_identifier: "com.#{TEAMID}.LoopFollow",
-      api_key: api_key,
-    )
-
     mapping = Actions.lane_context[
       SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING
     ]
