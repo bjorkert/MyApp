@@ -7,7 +7,7 @@ set -o errtrace
 trap 'echo "❌  Error – aborting"; exit 1' ERR
 
 # -------- configurable -----------------
-APP_NAME="${1:-MyApp}"
+APP_NAME="${1:-myApp}"
 SECOND_DIR="${APP_NAME}_Second"
 THIRD_DIR="${APP_NAME}_Third"
 VERSION_FILE="Config.xcconfig"
@@ -34,14 +34,20 @@ update_follower () {
   echo; echo "🔄  Updating $DIR …"
   cd "$DIR"
 
+  echo; echo "If there are custom changes needed to the patch, make the change before continuing"
+  pause
+
   # 1 · Make sure we’re on a clean, up-to-date main
   echo_run git switch "$MAIN_BRANCH"
   echo_run git fetch
   echo_run git pull
 
-  # 2 · Apply the patch with 3-way fallback
-  if ! git apply --3way  --whitespace=nowarn "$PATCH_FILE"; then
-    echo "‼️  Some hunks could not be merged automatically."
+  # 2 · Apply the patch
+  if ! git apply --whitespace=nowarn "$PATCH_FILE"; then
+    echo "‼️  Some changes could not be applied, so no changes were made."
+    echo "The command used was: git apply --whitespace=nowarn $PATCH_FILE"
+    echo; echo "Use a different terminal to fix and apply the patch before continuing"
+    pause
   fi
 
   # 3 · Pause if any conflict markers remain
@@ -58,7 +64,7 @@ update_follower () {
   git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
 
   echo_run git status
-  pause                                     # build & test checkpoint
+  echo "💻  Build & test $DIR now."; pause  # build & test checkpoint
   queue_push push origin "$MAIN_BRANCH"
   cd ..
 }
@@ -122,7 +128,9 @@ update_follower "$SECOND_DIR"
 update_follower "$THIRD_DIR"
 
 # ---------- GitHub Actions Test ---------
-echo; echo "💻  Test GitHub Build Actions and then continue."; pause
+echo; 
+echo "💻  Test GitHub Build Actions for all three repositories and then continue."; 
+pause
 
 # --- return to primary path
 cd ${PRIMARY_ABS_PATH}
@@ -131,7 +139,7 @@ cd ${PRIMARY_ABS_PATH}
 echo; echo "🚀  Ready to tag and push changes upstream."
 echo_run git log --oneline -2
 
-read -rp "▶▶  Ready to tag? (y/N): " confirm
+read -rp "▶▶  Ready to tag? (y/n): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
   git tag -a "v${new_ver}" -m "v${new_ver}"
   queue_push_tag "v${new_ver}"
@@ -140,7 +148,7 @@ else
   echo "🚫  tag skipped, can add later"
 fi
 
-read -rp "▶▶  Push everything now? (y/N): " confirm
+read -rp "▶▶  Push everything now? (y/n): " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
   for cmd in "${push_cmds[@]}"; do echo "+ $cmd"; bash -c "$cmd"; done
   echo "🎉  All pushes completed."
